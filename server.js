@@ -37,6 +37,69 @@ function scheduleCodeExpiry(code) {
 
 // Ana sayfa - Discord login
 app.get('/', (req, res) => {
+    // Environment variables kontrolü
+    if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URI || !REQUIRED_GUILD_ID) {
+        return res.send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Configuration Error</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        margin: 0;
+                    }
+                    .container {
+                        background: white;
+                        padding: 40px;
+                        border-radius: 10px;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                        max-width: 600px;
+                    }
+                    h1 { color: #f5576c; }
+                    .error { background: #ffe0e0; padding: 15px; border-radius: 5px; margin: 15px 0; }
+                    .code { background: #f0f0f0; padding: 10px; border-radius: 3px; font-family: monospace; }
+                    ul { text-align: left; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>⚠️ Configuration Error</h1>
+                    <p>Environment variables are not configured!</p>
+                    <div class="error">
+                        <strong>Missing variables:</strong>
+                        <ul>
+                            ${!CLIENT_ID ? '<li>DISCORD_CLIENT_ID</li>' : ''}
+                            ${!CLIENT_SECRET ? '<li>DISCORD_CLIENT_SECRET</li>' : ''}
+                            ${!REDIRECT_URI ? '<li>DISCORD_REDIRECT_URI</li>' : ''}
+                            ${!REQUIRED_GUILD_ID ? '<li>REQUIRED_GUILD_ID</li>' : ''}
+                        </ul>
+                    </div>
+                    <h3>How to fix (Render):</h3>
+                    <ol style="text-align: left;">
+                        <li>Go to Render Dashboard</li>
+                        <li>Select your web service</li>
+                        <li>Click "Environment" tab</li>
+                        <li>Add the missing variables</li>
+                        <li>Click "Save Changes"</li>
+                    </ol>
+                    <div class="code">
+                        DISCORD_CLIENT_ID=your_client_id<br>
+                        DISCORD_CLIENT_SECRET=your_client_secret<br>
+                        DISCORD_REDIRECT_URI=https://your-app.onrender.com/callback<br>
+                        REQUIRED_GUILD_ID=your_guild_id
+                    </div>
+                </div>
+            </body>
+            </html>
+        `);
+    }
+    
     res.send(`
         <!DOCTYPE html>
         <html>
