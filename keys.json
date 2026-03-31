@@ -1,0 +1,12 @@
+{
+  "keys": [
+    {
+      "code": "634451",
+      "username": "TestUser",
+      "expiresAt": 9999999999999,
+      "note": "Demo key - never expires"
+    }
+  ],
+  "version": "1.0.0",
+  "lastUpdate": "2026-03-31"
+}
