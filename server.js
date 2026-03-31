@@ -159,6 +159,8 @@ app.get('/callback', async (req, res) => {
     }
 
     try {
+        console.log('[AUTH] Callback received, exchanging code for token...');
+        
         // Access token al
         const tokenResponse = await axios.post(`${DISCORD_API}/oauth2/token`, new URLSearchParams({
             client_id: CLIENT_ID,
@@ -171,6 +173,7 @@ app.get('/callback', async (req, res) => {
         });
 
         const { access_token } = tokenResponse.data;
+        console.log('[AUTH] Token received successfully');
 
         // Kullanıcı bilgilerini al
         const userResponse = await axios.get(`${DISCORD_API}/users/@me`, {
@@ -178,6 +181,7 @@ app.get('/callback', async (req, res) => {
         });
 
         const user = userResponse.data;
+        console.log('[AUTH] User info:', user.username);
 
         // Kullanıcının sunucularını kontrol et
         const guildsResponse = await axios.get(`${DISCORD_API}/users/@me/guilds`, {
@@ -185,9 +189,13 @@ app.get('/callback', async (req, res) => {
         });
 
         const guilds = guildsResponse.data;
+        console.log('[AUTH] User guilds count:', guilds.length);
+        
         const isInRequiredGuild = guilds.some(guild => guild.id === REQUIRED_GUILD_ID);
+        console.log('[AUTH] Is in required guild:', isInRequiredGuild);
 
         if (!isInRequiredGuild) {
+            console.log('[AUTH] Access denied - user not in required guild');
             return res.send(`
                 <!DOCTYPE html>
                 <html>
@@ -214,8 +222,9 @@ app.get('/callback', async (req, res) => {
                 </head>
                 <body>
                     <div class="container">
-                        <h1>❌ Erişim Reddedildi</h1>
-                        <p>Bu scripti kullanmak için gerekli Discord sunucusunda olmalısınız!</p>
+                        <h1>❌ Access Denied</h1>
+                        <p>You must be in the required Discord server to use this script!</p>
+                        <p style="color: #999; font-size: 12px;">Required Guild ID: ${REQUIRED_GUILD_ID}</p>
                     </div>
                 </body>
                 </html>
@@ -233,7 +242,7 @@ app.get('/callback', async (req, res) => {
 
         scheduleCodeExpiry(accessCode);
 
-        console.log(`New code generated for ${user.username}: ${accessCode}`);
+        console.log(`[AUTH] Code generated for ${user.username}: ${accessCode}`);
 
         res.send(`
             <!DOCTYPE html>
@@ -283,18 +292,18 @@ app.get('/callback', async (req, res) => {
             </head>
             <body>
                 <div class="container">
-                    <h1>✅ Başarılı!</h1>
-                    <p>Hoş geldin, <strong>${user.username}</strong>!</p>
+                    <h1>✅ Success!</h1>
+                    <p>Welcome, <strong>${user.username}</strong>!</p>
                     <div class="code" id="code">${accessCode}</div>
-                    <button class="copy-btn" onclick="copyCode()">Kodu Kopyala</button>
-                    <p class="timer">⏱️ Bu kod 30 dakika geçerlidir</p>
-                    <p style="color: #999; font-size: 12px;">Kodu Roblox scriptine gir</p>
+                    <button class="copy-btn" onclick="copyCode()">Copy Code</button>
+                    <p class="timer">⏱️ This code is valid for 30 minutes</p>
+                    <p style="color: #999; font-size: 12px;">Enter this code in Roblox script</p>
                 </div>
                 <script>
                     function copyCode() {
                         const code = document.getElementById('code').innerText;
                         navigator.clipboard.writeText(code);
-                        alert('Kod kopyalandı: ' + code);
+                        alert('Code copied: ' + code);
                     }
                 </script>
             </body>
@@ -302,8 +311,47 @@ app.get('/callback', async (req, res) => {
         `);
 
     } catch (error) {
-        console.error('Auth error:', error.response?.data || error.message);
-        res.send('Authentication failed! Check server logs.');
+        console.error('[AUTH] Error:', error.response?.data || error.message);
+        console.error('[AUTH] Full error:', error);
+        res.send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Authentication Error</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        margin: 0;
+                    }
+                    .container {
+                        background: white;
+                        padding: 40px;
+                        border-radius: 10px;
+                        text-align: center;
+                        max-width: 600px;
+                    }
+                    h1 { color: #f5576c; }
+                    .error { background: #ffe0e0; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: left; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>❌ Authentication Failed</h1>
+                    <p>An error occurred during authentication.</p>
+                    <div class="error">
+                        <strong>Error:</strong><br>
+                        ${error.response?.data ? JSON.stringify(error.response.data) : error.message}
+                    </div>
+                    <p style="color: #999; font-size: 12px;">Check Render logs for details</p>
+                </div>
+            </body>
+            </html>
+        `);
     }
 });
 
