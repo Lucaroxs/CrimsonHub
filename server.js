@@ -38,7 +38,7 @@ function scheduleCodeExpiry(code) {
 // Ana sayfa - Discord login
 app.get('/', (req, res) => {
     // Environment variables kontrolü
-    if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URI || !REQUIRED_GUILD_ID) {
+    if (!CLIENT_ID || !REDIRECT_URI) {
         return res.send(`
             <!DOCTYPE html>
             <html>
@@ -59,12 +59,12 @@ app.get('/', (req, res) => {
                         padding: 40px;
                         border-radius: 10px;
                         box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                        text-align: center;
                         max-width: 600px;
                     }
-                    h1 { color: #f5576c; }
-                    .error { background: #ffe0e0; padding: 15px; border-radius: 5px; margin: 15px 0; }
-                    .code { background: #f0f0f0; padding: 10px; border-radius: 3px; font-family: monospace; }
-                    ul { text-align: left; }
+                    h1 { color: #f5576c; margin-bottom: 20px; }
+                    .error { background: #ffe0e0; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: left; }
+                    code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; }
                 </style>
             </head>
             <body>
@@ -72,34 +72,29 @@ app.get('/', (req, res) => {
                     <h1>⚠️ Configuration Error</h1>
                     <p>Environment variables are not configured!</p>
                     <div class="error">
-                        <strong>Missing variables:</strong>
-                        <ul>
-                            ${!CLIENT_ID ? '<li>DISCORD_CLIENT_ID</li>' : ''}
-                            ${!CLIENT_SECRET ? '<li>DISCORD_CLIENT_SECRET</li>' : ''}
-                            ${!REDIRECT_URI ? '<li>DISCORD_REDIRECT_URI</li>' : ''}
-                            ${!REQUIRED_GUILD_ID ? '<li>REQUIRED_GUILD_ID</li>' : ''}
-                        </ul>
+                        <strong>Missing variables:</strong><br>
+                        ${!CLIENT_ID ? '❌ DISCORD_CLIENT_ID<br>' : ''}
+                        ${!CLIENT_SECRET ? '❌ DISCORD_CLIENT_SECRET<br>' : ''}
+                        ${!REDIRECT_URI ? '❌ DISCORD_REDIRECT_URI<br>' : ''}
+                        ${!REQUIRED_GUILD_ID ? '❌ REQUIRED_GUILD_ID<br>' : ''}
                     </div>
-                    <h3>How to fix (Render):</h3>
+                    <p><strong>Render Dashboard:</strong></p>
                     <ol style="text-align: left;">
-                        <li>Go to Render Dashboard</li>
-                        <li>Select your web service</li>
+                        <li>Go to your service dashboard</li>
                         <li>Click "Environment" tab</li>
                         <li>Add the missing variables</li>
                         <li>Click "Save Changes"</li>
+                        <li>Wait for automatic redeploy</li>
                     </ol>
-                    <div class="code">
-                        DISCORD_CLIENT_ID=your_client_id<br>
-                        DISCORD_CLIENT_SECRET=your_client_secret<br>
-                        DISCORD_REDIRECT_URI=https://your-app.onrender.com/callback<br>
-                        REQUIRED_GUILD_ID=your_guild_id
-                    </div>
+                    <p style="color: #999; font-size: 12px; margin-top: 20px;">
+                        See <code>RENDER_SETUP.md</code> for detailed instructions
+                    </p>
                 </div>
             </body>
             </html>
         `);
     }
-    
+
     res.send(`
         <!DOCTYPE html>
         <html>
@@ -140,8 +135,8 @@ app.get('/', (req, res) => {
         <body>
             <div class="container">
                 <h1>🎮 Roblox Script Authentication</h1>
-                <p>Discord ile giriş yaparak 30 dakikalık erişim kodu alın</p>
-                <a href="/auth/discord" class="discord-btn">Discord ile Giriş Yap</a>
+                <p>Login with Discord to get your 30-minute access code</p>
+                <a href="/auth/discord" class="discord-btn">Login with Discord</a>
             </div>
         </body>
         </html>
