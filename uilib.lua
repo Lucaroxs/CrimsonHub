@@ -4650,3 +4650,531 @@ function UILibrary:CreateInfoBox(parent, config)
 end
 
 return UILibrary
+
+-- Graph/Chart Element
+function UILibrary:CreateGraph(parent, config)
+    local Graph = {}
+    Graph.Name = config.Name or "Graph"
+    Graph.Data = config.Data or {}
+    Graph.MaxValue = config.MaxValue or 100
+    Graph.Parent = parent
+    Graph.Library = parent.Library or parent.Tab.Library
+    
+    Graph.Container = Utility:Create("Frame", {
+        Name = Graph.Name,
+        Size = UDim2.new(1, 0, 0, 150),
+        BackgroundColor3 = Graph.Library.Theme.Background,
+        BorderSizePixel = 0,
+        Parent = parent.ElementsContainer or parent.Content
+    })
+    
+    Utility:AddCorner(Graph.Container, 8)
+    Utility:AddStroke(Graph.Container, Graph.Library.Theme.Border, 1)
+    
+    Graph.Label = Utility:Create("TextLabel", {
+        Size = UDim2.new(1, -20, 0, 25),
+        Position = UDim2.new(0, 10, 0, 5),
+        BackgroundTransparency = 1,
+        Text = config.Name or "Graph",
+        TextColor3 = Graph.Library.Theme.Text,
+        TextSize = 14,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = Graph.Container
+    })
+    
+    Graph.GraphFrame = Utility:Create("Frame", {
+        Size = UDim2.new(1, -20, 1, -40),
+        Position = UDim2.new(0, 10, 0, 35),
+        BackgroundColor3 = Graph.Library.Theme.Tertiary,
+        BorderSizePixel = 0,
+        Parent = Graph.Container
+    })
+    
+    Utility:AddCorner(Graph.GraphFrame, 6)
+    
+    function Graph:UpdateData(data)
+        self.Data = data
+        
+        -- Clear old bars
+        for _, child in pairs(self.GraphFrame:GetChildren()) do
+            if child:IsA("Frame") and child.Name == "Bar" then
+                child:Destroy()
+            end
+        end
+        
+        local barWidth = (self.GraphFrame.AbsoluteSize.X - (#data + 1) * 5) / #data
+        
+        for i, value in ipairs(data) do
+            local barHeight = (value / self.MaxValue) * (self.GraphFrame.AbsoluteSize.Y - 10)
+            
+            local bar = Utility:Create("Frame", {
+                Name = "Bar",
+                Size = UDim2.new(0, barWidth, 0, barHeight),
+                Position = UDim2.new(0, 5 + (i - 1) * (barWidth + 5), 1, -5 - barHeight),
+                BackgroundColor3 = self.Library.Theme.Accent,
+                BorderSizePixel = 0,
+                Parent = self.GraphFrame
+            })
+            
+            Utility:AddCorner(bar, 4)
+            Utility:AddGradient(bar, ColorSequence.new({
+                ColorSequenceKeypoint.new(0, self.Library.Theme.AccentHover),
+                ColorSequenceKeypoint.new(1, self.Library.Theme.Accent)
+            }), 90)
+        end
+    end
+    
+    Graph:UpdateData(Graph.Data)
+    
+    function Graph:UpdateTheme()
+        local theme = self.Library.Theme
+        Graph.Container.BackgroundColor3 = theme.Background
+        Graph.Label.TextColor3 = theme.Text
+        Graph.GraphFrame.BackgroundColor3 = theme.Tertiary
+    end
+    
+    if parent.Elements then
+        table.insert(parent.Elements, Graph)
+    end
+    
+    return Graph
+end
+
+-- Circular Progress
+function UILibrary:CreateCircularProgress(parent, config)
+    local CircularProgress = {}
+    CircularProgress.Name = config.Name or "Progress"
+    CircularProgress.Value = config.Value or 0
+    CircularProgress.Max = config.Max or 100
+    CircularProgress.Parent = parent
+    CircularProgress.Library = parent.Library or parent.Tab.Library
+    
+    CircularProgress.Container = Utility:Create("Frame", {
+        Name = CircularProgress.Name,
+        Size = UDim2.new(1, 0, 0, 120),
+        BackgroundColor3 = CircularProgress.Library.Theme.Background,
+        BorderSizePixel = 0,
+        Parent = parent.ElementsContainer or parent.Content
+    })
+    
+    Utility:AddCorner(CircularProgress.Container, 8)
+    Utility:AddStroke(CircularProgress.Container, CircularProgress.Library.Theme.Border, 1)
+    
+    CircularProgress.Label = Utility:Create("TextLabel", {
+        Size = UDim2.new(1, -20, 0, 25),
+        Position = UDim2.new(0, 10, 0, 5),
+        BackgroundTransparency = 1,
+        Text = config.Name or "Progress",
+        TextColor3 = CircularProgress.Library.Theme.Text,
+        TextSize = 14,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = CircularProgress.Container
+    })
+    
+    CircularProgress.CircleFrame = Utility:Create("Frame", {
+        Size = UDim2.new(0, 80, 0, 80),
+        Position = UDim2.new(0.5, -40, 0.5, 0),
+        BackgroundTransparency = 1,
+        Parent = CircularProgress.Container
+    })
+    
+    CircularProgress.PercentLabel = Utility:Create("TextLabel", {
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundTransparency = 1,
+        Text = "0%",
+        TextColor3 = CircularProgress.Library.Theme.Accent,
+        TextSize = 20,
+        Font = Enum.Font.GothamBold,
+        Parent = CircularProgress.CircleFrame
+    })
+    
+    function CircularProgress:SetValue(value)
+        self.Value = math.clamp(value, 0, self.Max)
+        local percent = (self.Value / self.Max) * 100
+        self.PercentLabel.Text = math.floor(percent) .. "%"
+    end
+    
+    CircularProgress:SetValue(CircularProgress.Value)
+    
+    function CircularProgress:UpdateTheme()
+        local theme = self.Library.Theme
+        CircularProgress.Container.BackgroundColor3 = theme.Background
+        CircularProgress.Label.TextColor3 = theme.Text
+        CircularProgress.PercentLabel.TextColor3 = theme.Accent
+    end
+    
+    if parent.Elements then
+        table.insert(parent.Elements, CircularProgress)
+    end
+    
+    return CircularProgress
+end
+
+-- Rating Element (Stars)
+function UILibrary:CreateRating(parent, config)
+    local Rating = {}
+    Rating.Name = config.Name or "Rating"
+    Rating.Max = config.Max or 5
+    Rating.Default = config.Default or 0
+    Rating.Callback = config.Callback or function() end
+    Rating.Flag = config.Flag
+    Rating.Parent = parent
+    Rating.Library = parent.Library or parent.Tab.Library
+    Rating.Value = Rating.Default
+    Rating.Stars = {}
+    
+    Rating.Container = Utility:Create("Frame", {
+        Name = Rating.Name,
+        Size = UDim2.new(1, 0, 0, 60),
+        BackgroundColor3 = Rating.Library.Theme.Background,
+        BorderSizePixel = 0,
+        Parent = parent.ElementsContainer or parent.Content
+    })
+    
+    Utility:AddCorner(Rating.Container, 8)
+    Utility:AddStroke(Rating.Container, Rating.Library.Theme.Border, 1)
+    
+    Rating.Label = Utility:Create("TextLabel", {
+        Size = UDim2.new(1, -20, 0, 20),
+        Position = UDim2.new(0, 10, 0, 5),
+        BackgroundTransparency = 1,
+        Text = config.Name or "Rating",
+        TextColor3 = Rating.Library.Theme.Text,
+        TextSize = 14,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = Rating.Container
+    })
+    
+    Rating.StarsFrame = Utility:Create("Frame", {
+        Size = UDim2.new(0, Rating.Max * 35, 0, 30),
+        Position = UDim2.new(0, 10, 0, 28),
+        BackgroundTransparency = 1,
+        Parent = Rating.Container
+    })
+    
+    for i = 1, Rating.Max do
+        local star = Utility:Create("TextButton", {
+            Size = UDim2.new(0, 30, 0, 30),
+            Position = UDim2.new(0, (i - 1) * 35, 0, 0),
+            BackgroundTransparency = 1,
+            Text = "★",
+            TextColor3 = i <= Rating.Default and Rating.Library.Theme.Warning or Rating.Library.Theme.Border,
+            TextSize = 24,
+            Font = Enum.Font.GothamBold,
+            Parent = Rating.StarsFrame
+        })
+        
+        star.MouseButton1Click:Connect(function()
+            Rating:SetValue(i)
+        end)
+        
+        star.MouseEnter:Connect(function()
+            for j = 1, Rating.Max do
+                Rating.Stars[j].TextColor3 = j <= i and Rating.Library.Theme.Warning or Rating.Library.Theme.Border
+            end
+        end)
+        
+        star.MouseLeave:Connect(function()
+            for j = 1, Rating.Max do
+                Rating.Stars[j].TextColor3 = j <= Rating.Value and Rating.Library.Theme.Warning or Rating.Library.Theme.Border
+            end
+        end)
+        
+        Rating.Stars[i] = star
+    end
+    
+    function Rating:SetValue(value)
+        self.Value = math.clamp(value, 0, self.Max)
+        
+        for i = 1, self.Max do
+            self.Stars[i].TextColor3 = i <= self.Value and self.Library.Theme.Warning or self.Library.Theme.Border
+        end
+        
+        if self.Flag then
+            self.Library.Flags[self.Flag] = self.Value
+        end
+        
+        self.Callback(self.Value)
+    end
+    
+    function Rating:UpdateTheme()
+        local theme = self.Library.Theme
+        Rating.Container.BackgroundColor3 = theme.Background
+        Rating.Label.TextColor3 = theme.Text
+        
+        for i = 1, Rating.Max do
+            Rating.Stars[i].TextColor3 = i <= Rating.Value and theme.Warning or theme.Border
+        end
+    end
+    
+    if Rating.Flag then
+        Rating.Library.Flags[Rating.Flag] = Rating.Value
+    end
+    
+    if parent.Elements then
+        table.insert(parent.Elements, Rating)
+    end
+    
+    return Rating
+end
+
+-- File Browser Element
+function UILibrary:CreateFileBrowser(parent, config)
+    local FileBrowser = {}
+    FileBrowser.Name = config.Name or "File Browser"
+    FileBrowser.Callback = config.Callback or function() end
+    FileBrowser.Parent = parent
+    FileBrowser.Library = parent.Library or parent.Tab.Library
+    FileBrowser.SelectedFile = ""
+    
+    FileBrowser.Container = Utility:Create("Frame", {
+        Name = FileBrowser.Name,
+        Size = UDim2.new(1, 0, 0, 200),
+        BackgroundColor3 = FileBrowser.Library.Theme.Background,
+        BorderSizePixel = 0,
+        Parent = parent.ElementsContainer or parent.Content
+    })
+    
+    Utility:AddCorner(FileBrowser.Container, 8)
+    Utility:AddStroke(FileBrowser.Container, FileBrowser.Library.Theme.Border, 1)
+    
+    FileBrowser.Label = Utility:Create("TextLabel", {
+        Size = UDim2.new(1, -20, 0, 25),
+        Position = UDim2.new(0, 10, 0, 5),
+        BackgroundTransparency = 1,
+        Text = config.Name or "File Browser",
+        TextColor3 = FileBrowser.Library.Theme.Text,
+        TextSize = 14,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = FileBrowser.Container
+    })
+    
+    FileBrowser.FileList = Utility:Create("ScrollingFrame", {
+        Size = UDim2.new(1, -20, 1, -70),
+        Position = UDim2.new(0, 10, 0, 35),
+        BackgroundColor3 = FileBrowser.Library.Theme.Tertiary,
+        BorderSizePixel = 0,
+        ScrollBarThickness = 4,
+        ScrollBarImageColor3 = FileBrowser.Library.Theme.Accent,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        Parent = FileBrowser.Container
+    })
+    
+    Utility:AddCorner(FileBrowser.FileList, 6)
+    
+    local fileLayout = Utility:Create("UIListLayout", {
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Padding = UDim.new(0, 2),
+        Parent = FileBrowser.FileList
+    })
+    
+    FileBrowser.SelectedLabel = Utility:Create("TextLabel", {
+        Size = UDim2.new(1, -20, 0, 25),
+        Position = UDim2.new(0, 10, 1, -30),
+        BackgroundTransparency = 1,
+        Text = "Selected: None",
+        TextColor3 = FileBrowser.Library.Theme.TextDark,
+        TextSize = 12,
+        Font = Enum.Font.Gotham,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = FileBrowser.Container
+    })
+    
+    function FileBrowser:AddFile(fileName)
+        local fileButton = Utility:Create("TextButton", {
+            Size = UDim2.new(1, -10, 0, 28),
+            BackgroundColor3 = self.Library.Theme.Background,
+            BorderSizePixel = 0,
+            Text = "📄 " .. fileName,
+            TextColor3 = self.Library.Theme.Text,
+            TextSize = 13,
+            Font = Enum.Font.Gotham,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = self.FileList
+        })
+        
+        Utility:Create("UIPadding", {
+            PaddingLeft = UDim.new(0, 10),
+            Parent = fileButton
+        })
+        
+        Utility:AddCorner(fileButton, 4)
+        
+        fileButton.MouseEnter:Connect(function()
+            Utility:Tween(fileButton, {BackgroundColor3 = self.Library.Theme.Accent}, 0.2)
+        end)
+        
+        fileButton.MouseLeave:Connect(function()
+            Utility:Tween(fileButton, {BackgroundColor3 = self.Library.Theme.Background}, 0.2)
+        end)
+        
+        fileButton.MouseButton1Click:Connect(function()
+            self.SelectedFile = fileName
+            self.SelectedLabel.Text = "Selected: " .. fileName
+            self.Callback(fileName)
+        end)
+        
+        fileLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            self.FileList.CanvasSize = UDim2.new(0, 0, 0, fileLayout.AbsoluteContentSize.Y + 5)
+        end)
+    end
+    
+    function FileBrowser:Clear()
+        for _, child in pairs(self.FileList:GetChildren()) do
+            if child:IsA("TextButton") then
+                child:Destroy()
+            end
+        end
+        self.SelectedFile = ""
+        self.SelectedLabel.Text = "Selected: None"
+    end
+    
+    function FileBrowser:UpdateTheme()
+        local theme = self.Library.Theme
+        FileBrowser.Container.BackgroundColor3 = theme.Background
+        FileBrowser.Label.TextColor3 = theme.Text
+        FileBrowser.FileList.BackgroundColor3 = theme.Tertiary
+        FileBrowser.SelectedLabel.TextColor3 = theme.TextDark
+    end
+    
+    if parent.Elements then
+        table.insert(parent.Elements, FileBrowser)
+    end
+    
+    return FileBrowser
+end
+
+-- Code Editor Element
+function UILibrary:CreateCodeEditor(parent, config)
+    local CodeEditor = {}
+    CodeEditor.Name = config.Name or "Code Editor"
+    CodeEditor.Default = config.Default or ""
+    CodeEditor.Callback = config.Callback or function() end
+    CodeEditor.Flag = config.Flag
+    CodeEditor.Parent = parent
+    CodeEditor.Library = parent.Library or parent.Tab.Library
+    CodeEditor.Value = CodeEditor.Default
+    
+    CodeEditor.Container = Utility:Create("Frame", {
+        Name = CodeEditor.Name,
+        Size = UDim2.new(1, 0, 0, 250),
+        BackgroundColor3 = CodeEditor.Library.Theme.Background,
+        BorderSizePixel = 0,
+        Parent = parent.ElementsContainer or parent.Content
+    })
+    
+    Utility:AddCorner(CodeEditor.Container, 8)
+    Utility:AddStroke(CodeEditor.Container, CodeEditor.Library.Theme.Border, 1)
+    
+    CodeEditor.Header = Utility:Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 35),
+        BackgroundColor3 = CodeEditor.Library.Theme.Tertiary,
+        BorderSizePixel = 0,
+        Parent = CodeEditor.Container
+    })
+    
+    Utility:AddCorner(CodeEditor.Header, 8)
+    
+    local headerCover = Utility:Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 8),
+        Position = UDim2.new(0, 0, 1, -8),
+        BackgroundColor3 = CodeEditor.Library.Theme.Tertiary,
+        BorderSizePixel = 0,
+        Parent = CodeEditor.Header
+    })
+    
+    CodeEditor.Label = Utility:Create("TextLabel", {
+        Size = UDim2.new(1, -100, 1, 0),
+        Position = UDim2.new(0, 10, 0, 0),
+        BackgroundTransparency = 1,
+        Text = config.Name or "Code Editor",
+        TextColor3 = CodeEditor.Library.Theme.Text,
+        TextSize = 14,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = CodeEditor.Header
+    })
+    
+    CodeEditor.ExecuteButton = Utility:Create("TextButton", {
+        Size = UDim2.new(0, 80, 0, 25),
+        Position = UDim2.new(1, -90, 0.5, -12.5),
+        BackgroundColor3 = CodeEditor.Library.Theme.Success,
+        BorderSizePixel = 0,
+        Text = "Execute",
+        TextColor3 = Color3.fromRGB(255, 255, 255),
+        TextSize = 12,
+        Font = Enum.Font.GothamSemibold,
+        Parent = CodeEditor.Header
+    })
+    
+    Utility:AddCorner(CodeEditor.ExecuteButton, 6)
+    
+    CodeEditor.EditorFrame = Utility:Create("ScrollingFrame", {
+        Size = UDim2.new(1, -10, 1, -45),
+        Position = UDim2.new(0, 5, 0, 40),
+        BackgroundColor3 = Color3.fromRGB(30, 30, 35),
+        BorderSizePixel = 0,
+        ScrollBarThickness = 6,
+        ScrollBarImageColor3 = CodeEditor.Library.Theme.Accent,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
+        Parent = CodeEditor.Container
+    })
+    
+    Utility:AddCorner(CodeEditor.EditorFrame, 6)
+    
+    CodeEditor.TextBox = Utility:Create("TextBox", {
+        Size = UDim2.new(1, -10, 1, 0),
+        Position = UDim2.new(0, 5, 0, 0),
+        BackgroundTransparency = 1,
+        Text = CodeEditor.Default,
+        PlaceholderText = "-- Enter code here...",
+        TextColor3 = Color3.fromRGB(220, 220, 220),
+        PlaceholderColor3 = Color3.fromRGB(100, 100, 100),
+        TextSize = 14,
+        Font = Enum.Font.Code,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextYAlignment = Enum.TextYAlignment.Top,
+        ClearTextOnFocus = false,
+        MultiLine = true,
+        Parent = CodeEditor.EditorFrame
+    })
+    
+    CodeEditor.ExecuteButton.MouseButton1Click:Connect(function()
+        CodeEditor:SetValue(CodeEditor.TextBox.Text)
+    end)
+    
+    function CodeEditor:SetValue(value)
+        self.Value = value
+        self.TextBox.Text = value
+        
+        if self.Flag then
+            self.Library.Flags[self.Flag] = value
+        end
+        
+        self.Callback(value)
+    end
+    
+    function CodeEditor:UpdateTheme()
+        local theme = self.Library.Theme
+        CodeEditor.Container.BackgroundColor3 = theme.Background
+        CodeEditor.Header.BackgroundColor3 = theme.Tertiary
+        CodeEditor.Label.TextColor3 = theme.Text
+        CodeEditor.ExecuteButton.BackgroundColor3 = theme.Success
+    end
+    
+    if CodeEditor.Flag then
+        CodeEditor.Library.Flags[CodeEditor.Flag] = CodeEditor.Value
+    end
+    
+    if parent.Elements then
+        table.insert(parent.Elements, CodeEditor)
+    end
+    
+    return CodeEditor
+end
+
+return UILibrary
