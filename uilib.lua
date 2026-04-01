@@ -205,8 +205,8 @@ function UILibrary:New(config)
     self.Config = {
         Title = config.Title or "UI Library",
         Theme = config.Theme or "Dark",
-        Size = config.Size or UDim2.new(0, 650, 0, 550),
-        Position = config.Position or UDim2.new(0.5, -325, 0.5, -275),
+        Size = config.Size or UDim2.new(0, 700, 0, 450),
+        Position = config.Position or UDim2.new(0.5, -350, 0.5, -225),
         Draggable = config.Draggable ~= false,
         MinimizeKey = config.MinimizeKey or Enum.KeyCode.RightControl,
         ToggleKey = config.ToggleKey or Enum.KeyCode.Insert,
