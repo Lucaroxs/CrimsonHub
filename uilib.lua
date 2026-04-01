@@ -195,7 +195,7 @@ end
 function Utility:RippleEffect(button, color)
     button.ClipsDescendants = true
     
-    button.MouseButton1Click:Connect(function()
+    local function createRipple()
         local ripple = Utility:Create("Frame", {
             Size = UDim2.new(0, 0, 0, 0),
             Position = UDim2.new(0, Mouse.X - button.AbsolutePosition.X, 0, Mouse.Y - button.AbsolutePosition.Y),
@@ -216,7 +216,18 @@ function Utility:RippleEffect(button, color)
         }, 0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out, function()
             ripple:Destroy()
         end)
-    end)
+    end
+    
+    -- Check if it's a TextButton or Frame
+    if button:IsA("TextButton") or button:IsA("ImageButton") then
+        button.MouseButton1Click:Connect(createRipple)
+    else
+        -- For Frames, find the TextButton child or create one
+        local clickDetector = button:FindFirstChildOfClass("TextButton")
+        if clickDetector then
+            clickDetector.MouseButton1Click:Connect(createRipple)
+        end
+    end
 end
 
 -- Theme System
@@ -486,7 +497,6 @@ function UILibrary:CreateUI()
     })
     
     Utility:AddCorner(self.MinimizeButton, 8)
-    Utility:RippleEffect(self.MinimizeButton, self.Theme.Accent)
     
     self.MinimizeButton.MouseEnter:Connect(function()
         Utility:Tween(self.MinimizeButton, {BackgroundColor3 = self.Theme.Accent}, 0.2)
@@ -515,7 +525,6 @@ function UILibrary:CreateUI()
     })
     
     Utility:AddCorner(self.CloseButton, 8)
-    Utility:RippleEffect(self.CloseButton, Color3.fromRGB(255, 255, 255))
     
     self.CloseButton.MouseEnter:Connect(function()
         Utility:Tween(self.CloseButton, {BackgroundColor3 = Color3.fromRGB(255, 91, 91)}, 0.2)
@@ -895,8 +904,6 @@ function UILibrary:CreateButton(parent, config)
         Font = Enum.Font.GothamSemibold,
         Parent = Button.Container
     })
-    
-    Utility:RippleEffect(Button.Container, Color3.fromRGB(255, 255, 255))
     
     Button.ButtonObj.MouseEnter:Connect(function()
         Utility:Tween(Button.Container, {BackgroundColor3 = Button.Library.Theme.AccentHover}, 0.2)
