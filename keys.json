@@ -4,13 +4,13 @@
       "code": "436141",
       "username": "Demo User",
       "expiresAt": 9999999999999,
-      "note": "Demo key"
+      "role": "Demo"
     },
     {
       "code": "111111",
       "username": "Lucarox",
       "expiresAt": 9999999999999,
-      "note": "Owner"
+      "role": "Owner"
     }
     
     
