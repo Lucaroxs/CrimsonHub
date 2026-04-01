@@ -205,10 +205,11 @@ function UILibrary:New(config)
     self.Config = {
         Title = config.Title or "UI Library",
         Theme = config.Theme or "Dark",
-        Size = config.Size or UDim2.new(0, 550, 0, 600),
-        Position = config.Position or UDim2.new(0.5, -275, 0.5, -300),
+        Size = config.Size or UDim2.new(0, 650, 0, 550),
+        Position = config.Position or UDim2.new(0.5, -325, 0.5, -275),
         Draggable = config.Draggable ~= false,
         MinimizeKey = config.MinimizeKey or Enum.KeyCode.RightControl,
+        ToggleKey = config.ToggleKey or Enum.KeyCode.Insert,
         SaveConfig = config.SaveConfig ~= false
     }
     
@@ -427,11 +428,16 @@ end
 
 function UILibrary:SetupMinimize()
     self.Minimized = false
+    self.Hidden = false
     self.OriginalSize = self.Config.Size
     
     UserInputService.InputBegan:Connect(function(input, gameProcessed)
         if not gameProcessed and input.KeyCode == self.Config.MinimizeKey then
             self:ToggleMinimize()
+        end
+        
+        if not gameProcessed and input.KeyCode == self.Config.ToggleKey then
+            self:ToggleUI()
         end
     end)
 end
@@ -451,6 +457,20 @@ function UILibrary:ToggleMinimize()
         }, 0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
         
         self.MinimizeButton.Text = "—"
+    end
+end
+
+function UILibrary:ToggleUI()
+    self.Hidden = not self.Hidden
+    
+    if self.Hidden then
+        Utility:Tween(self.MainFrame, {
+            Position = UDim2.new(0.5, 0, 1.5, 0)
+        }, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+    else
+        Utility:Tween(self.MainFrame, {
+            Position = self.Config.Position
+        }, 0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out)
     end
 end
 
