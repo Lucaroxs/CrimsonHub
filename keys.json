@@ -1,4 +1,5 @@
 {
+  "active": 1,
   "keys": [
     {
       "code": "436141",
@@ -12,9 +13,21 @@
       "expiresAt": 9999999999999,
       "role": "Owner"
     }
-    
-    
+  ],
+  "buttons": [
+    {
+      "label": "Discord",
+      "color": [88, 101, 242],
+      "textColor": [255, 255, 255],
+      "link": "https://discord.gg/qKpr3BJJMq"
+    },
+    {
+      "label": "Telegram",
+      "color": [0, 136, 204],
+      "textColor": [255, 255, 255],
+      "link": ""
+    }
   ],
   "version": "1.0.0",
-  "lastUpdate": "2026-03-31"
+  "lastUpdate": "2026-04-23"
 }
