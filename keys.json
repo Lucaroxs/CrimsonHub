@@ -6,12 +6,6 @@
       "username": "Demo User",
       "expiresAt": 9999999999999,
       "role": "Demo"
-    },
-    {
-      "code": "111111",
-      "username": "Lucarox",
-      "expiresAt": 9999999999999,
-      "role": "Owner"
     }
   ],
   "buttons": [
