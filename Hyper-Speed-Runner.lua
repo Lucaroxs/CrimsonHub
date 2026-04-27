@@ -5,12 +5,7 @@ local RunService = game:GetService("RunService")
 
 -- Game ID kontrolü
 local ALLOWED_GAMES = {
-    [87174985211630]  = true,
-    [112643969622939] = true,
-    [120353476844030] = true,
-    [122113119279250] = true,
-    [123227654193784] = true,
-    [137454360654075] = true,
+    [88933961678687]  = true,
 }
 
 if not ALLOWED_GAMES[game.PlaceId] then return end
@@ -323,7 +318,7 @@ local w1Label = Instance.new("TextLabel")
 w1Label.Size = UDim2.new(1, -20, 0, 28)
 w1Label.Position = UDim2.new(0, 10, 0, 55)
 w1Label.BackgroundTransparency = 1
-w1Label.Text = "World Forest"
+w1Label.Text = "World 1"
 w1Label.TextColor3 = Color3.fromRGB(60, 200, 80)
 w1Label.TextSize = 15
 w1Label.Font = Enum.Font.GothamBold
@@ -332,38 +327,8 @@ w1Label.Parent = afPage
 
 local getW1 = makeCheckbox(afPage, "Start AutoFarm", Color3.fromRGB(200, 200, 200), 88, false)
 
--- World Snowy (W2) — açık beyaz/buz mavisi
-local w2Label = Instance.new("TextLabel")
-w2Label.Size = UDim2.new(1, -20, 0, 28)
-w2Label.Position = UDim2.new(0, 10, 0, 128)
-w2Label.BackgroundTransparency = 1
-w2Label.Text = "World Snowy"
-w2Label.TextColor3 = Color3.fromRGB(220, 240, 255)
-w2Label.TextSize = 15
-w2Label.Font = Enum.Font.GothamBold
-w2Label.TextXAlignment = Enum.TextXAlignment.Left
-w2Label.Parent = afPage
-
-local getW2 = makeCheckbox(afPage, "Start AutoFarm", Color3.fromRGB(200, 200, 200), 161, false)
-
--- World Volcanic (W3) — kan kırmızısı
-local w3Label = Instance.new("TextLabel")
-w3Label.Size = UDim2.new(1, -20, 0, 28)
-w3Label.Position = UDim2.new(0, 10, 0, 201)
-w3Label.BackgroundTransparency = 1
-w3Label.Text = "World Volcanic"
-w3Label.TextColor3 = Color3.fromRGB(180, 20, 20)
-w3Label.TextSize = 15
-w3Label.Font = Enum.Font.GothamBold
-w3Label.TextXAlignment = Enum.TextXAlignment.Left
-w3Label.Parent = afPage
-
-local getW3 = makeCheckbox(afPage, "Start AutoFarm", Color3.fromRGB(200, 200, 200), 234, false)
-
 -- TP koordinatları
-local W1_X, W1_Y, W1_Z = -42.52934646606445, 4.779781341552734 + 2, -746.8523559570312
-local W2_X, W2_Y, W2_Z = -43.76065444946289,  4.750176906585693  + 2, -744.9625854492188
-local W3_X, W3_Y, W3_Z = -43.904701232910156, 4.820958137512207  + 2, -746.3699951171875
+local W1_X, W1_Y, W1_Z = 3.9463701248168945, 8.378718376159668, -9075.109375
 
 task.spawn(function()
     while true do
@@ -374,10 +339,6 @@ task.spawn(function()
             local rot = hrp.CFrame - hrp.CFrame.Position
             if getW1() then
                 hrp.CFrame = CFrame.new(W1_X, W1_Y, W1_Z) * rot
-            elseif getW2() then
-                hrp.CFrame = CFrame.new(W2_X, W2_Y, W2_Z) * rot
-            elseif getW3() then
-                hrp.CFrame = CFrame.new(W3_X, W3_Y, W3_Z) * rot
             end
         end
     end

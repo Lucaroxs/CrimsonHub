@@ -3,14 +3,10 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 
--- Game ID kontrolü
+-- Game ID kontrolü — izin verilmeyen oyunda script yüklenmiyor
 local ALLOWED_GAMES = {
-    [87174985211630]  = true,
-    [112643969622939] = true,
-    [120353476844030] = true,
-    [122113119279250] = true,
-    [123227654193784] = true,
-    [137454360654075] = true,
+    [76335816485479] = true,
+    [122902171482835] = true,
 }
 
 if not ALLOWED_GAMES[game.PlaceId] then return end
@@ -36,6 +32,7 @@ local function makeCorner(parent, radius)
     c.Parent = parent
 end
 
+-- ============ YILDIZLAR (MainFrame - siyah bg) ============
 local function spawnStars(parent, count, color)
     for i = 1, count do
         local Star = Instance.new("Frame")
@@ -48,14 +45,17 @@ local function spawnStars(parent, count, color)
         Star.BackgroundTransparency = math.random(10, 50) / 100
         Star.Parent = parent
         makeCorner(Star, 8)
+
         task.spawn(function()
+            -- Her yıldız için rastgele faz ve periyot
             local phase = math.random(0, 628) / 100
-            local period = math.random(30, 70) / 10
-            local amp = math.random(2, 5) / 1000
+            local period = math.random(30, 70) / 10  -- 3-7 saniye tam sallanma
+            local amp = math.random(2, 5) / 1000     -- çok küçük genlik
             local t = phase
             while true do
                 task.wait(0.03)
                 t = t + 0.03
+                -- sin ile yumuşak sağa-sola sallanma
                 local dx = math.sin(t * (math.pi * 2 / period)) * amp
                 Star.Position = UDim2.new(startX + dx, 0, startY, 0)
             end
@@ -175,6 +175,7 @@ MenuFrame.BackgroundTransparency = 1
 MenuFrame.Visible = false
 MenuFrame.Parent = MainFrame
 
+-- Sidebar
 local SIDEBAR_W = 140
 local Sidebar = Instance.new("Frame")
 Sidebar.Size = UDim2.new(0, SIDEBAR_W, 1, 0)
@@ -183,6 +184,7 @@ Sidebar.BorderSizePixel = 0
 Sidebar.Parent = MenuFrame
 makeCorner(Sidebar, 15)
 
+-- Sidebar yıldızlar (koyu tona uygun, daha soluk)
 spawnStars(Sidebar, 30, Color3.fromRGB(160, 160, 180))
 
 local SidebarTitle = Instance.new("TextLabel")
@@ -210,6 +212,7 @@ SidebarPadding.PaddingLeft = UDim.new(0, 8)
 SidebarPadding.PaddingRight = UDim.new(0, 8)
 SidebarPadding.Parent = SidebarList
 
+-- İçerik alanı
 local ContentArea = Instance.new("Frame")
 ContentArea.Size = UDim2.new(1, -SIDEBAR_W, 1, 0)
 ContentArea.Position = UDim2.new(0, SIDEBAR_W, 0, 0)
@@ -271,6 +274,7 @@ afTitle.Font = Enum.Font.GothamBold
 afTitle.TextXAlignment = Enum.TextXAlignment.Center
 afTitle.Parent = afPage
 
+-- Checkbox helper
 local function makeCheckbox(parent, label, labelColor, yPos, defaultOn)
     local Row = Instance.new("Frame")
     Row.Size = UDim2.new(1, -20, 0, 28)
@@ -312,19 +316,23 @@ local function makeCheckbox(parent, label, labelColor, yPos, defaultOn)
     Box.MouseButton1Click:Connect(function()
         enabled = not enabled
         Check.Visible = enabled
-        Box.BackgroundColor3 = enabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(30, 30, 30)
+        if enabled then
+            Box.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        else
+            Box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        end
     end)
 
     return function() return enabled end
 end
 
--- World Forest (W1) — yeşil
+-- World 1
 local w1Label = Instance.new("TextLabel")
 w1Label.Size = UDim2.new(1, -20, 0, 28)
 w1Label.Position = UDim2.new(0, 10, 0, 55)
 w1Label.BackgroundTransparency = 1
-w1Label.Text = "World Forest"
-w1Label.TextColor3 = Color3.fromRGB(60, 200, 80)
+w1Label.Text = "World 1"
+w1Label.TextColor3 = Color3.fromRGB(80, 220, 100)
 w1Label.TextSize = 15
 w1Label.Font = Enum.Font.GothamBold
 w1Label.TextXAlignment = Enum.TextXAlignment.Left
@@ -332,38 +340,28 @@ w1Label.Parent = afPage
 
 local getW1 = makeCheckbox(afPage, "Start AutoFarm", Color3.fromRGB(200, 200, 200), 88, false)
 
--- World Snowy (W2) — açık beyaz/buz mavisi
+-- World 2
 local w2Label = Instance.new("TextLabel")
 w2Label.Size = UDim2.new(1, -20, 0, 28)
-w2Label.Position = UDim2.new(0, 10, 0, 128)
+w2Label.Position = UDim2.new(0, 10, 0, 130)
 w2Label.BackgroundTransparency = 1
-w2Label.Text = "World Snowy"
-w2Label.TextColor3 = Color3.fromRGB(220, 240, 255)
+w2Label.Text = "World 2"
+w2Label.TextColor3 = Color3.fromRGB(80, 180, 255)
 w2Label.TextSize = 15
 w2Label.Font = Enum.Font.GothamBold
 w2Label.TextXAlignment = Enum.TextXAlignment.Left
 w2Label.Parent = afPage
 
-local getW2 = makeCheckbox(afPage, "Start AutoFarm", Color3.fromRGB(200, 200, 200), 161, false)
+local getW2 = makeCheckbox(afPage, "Start AutoFarm", Color3.fromRGB(200, 200, 200), 163, false)
 
--- World Volcanic (W3) — kan kırmızısı
-local w3Label = Instance.new("TextLabel")
-w3Label.Size = UDim2.new(1, -20, 0, 28)
-w3Label.Position = UDim2.new(0, 10, 0, 201)
-w3Label.BackgroundTransparency = 1
-w3Label.Text = "World Volcanic"
-w3Label.TextColor3 = Color3.fromRGB(180, 20, 20)
-w3Label.TextSize = 15
-w3Label.Font = Enum.Font.GothamBold
-w3Label.TextXAlignment = Enum.TextXAlignment.Left
-w3Label.Parent = afPage
+-- TP loop
+local W1_X = 5173.1962890625
+local W1_Y = 7.741428852081299 + 2
+local W1_Z = 21.67247772216797
 
-local getW3 = makeCheckbox(afPage, "Start AutoFarm", Color3.fromRGB(200, 200, 200), 234, false)
-
--- TP koordinatları
-local W1_X, W1_Y, W1_Z = -42.52934646606445, 4.779781341552734 + 2, -746.8523559570312
-local W2_X, W2_Y, W2_Z = -43.76065444946289,  4.750176906585693  + 2, -744.9625854492188
-local W3_X, W3_Y, W3_Z = -43.904701232910156, 4.820958137512207  + 2, -746.3699951171875
+local W2_X = 4071.8681640625
+local W2_Y = 74.40615844726562 + 2
+local W2_Z = -105.99004364013672
 
 task.spawn(function()
     while true do
@@ -371,13 +369,12 @@ task.spawn(function()
         local char = Players.LocalPlayer.Character
         local hrp = char and char:FindFirstChild("HumanoidRootPart")
         if hrp then
-            local rot = hrp.CFrame - hrp.CFrame.Position
             if getW1() then
+                local rot = hrp.CFrame - hrp.CFrame.Position
                 hrp.CFrame = CFrame.new(W1_X, W1_Y, W1_Z) * rot
             elseif getW2() then
+                local rot = hrp.CFrame - hrp.CFrame.Position
                 hrp.CFrame = CFrame.new(W2_X, W2_Y, W2_Z) * rot
-            elseif getW3() then
-                hrp.CFrame = CFrame.new(W3_X, W3_Y, W3_Z) * rot
             end
         end
     end
@@ -385,7 +382,8 @@ end)
 
 -- ============ MENÜ SÜRÜKLEME ============
 local dragging = false
-local dragStart, startPos = nil, nil
+local dragStart = nil
+local startPos = nil
 
 Sidebar.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -410,8 +408,6 @@ UserInputService.InputEnded:Connect(function(input)
         dragging = false
     end
 end)
-
--- ============ SETTINGS ============
 local settingsBtn, settingsPage = addTab("Settings", 2)
 
 local stTitle = Instance.new("TextLabel")
@@ -447,6 +443,7 @@ KeyBindBtn.Font = Enum.Font.GothamBold
 KeyBindBtn.Parent = settingsPage
 makeCorner(KeyBindBtn)
 
+-- Keybind sistemi
 local toggleKey = Enum.KeyCode.Insert
 local listeningForKey = false
 
@@ -464,6 +461,8 @@ UserInputService.InputBegan:Connect(function(input, gpe)
         listeningForKey = false
         return
     end
+
+    -- Menüyü aç/kapat (sadece menü açıkken çalışır, login ekranında değil)
     if not gpe and input.UserInputType == Enum.UserInputType.Keyboard then
         if input.KeyCode == toggleKey and MenuFrame.Visible then
             MainFrame.Visible = not MainFrame.Visible
@@ -471,6 +470,7 @@ UserInputService.InputBegan:Connect(function(input, gpe)
     end
 end)
 
+-- Varsayılan tab
 setActiveTab(afBtn, afPage)
 
 -- ============ JSON YÜKLEMESİ ============
@@ -484,10 +484,12 @@ task.spawn(function()
         local parsed = HttpService:JSONDecode(raw)
         jsonData = parsed
 
+        -- Active kontrolü
         if parsed.active == 0 then
+            -- Her şeyi gizle, sadece mesaj göster
             InputRow.Visible = false
             BtnRow.Visible = false
-            Title.Text = "Arox Hub"
+            Title.Text = "AroxNet"
             Title.Position = UDim2.new(0, 0, 0.5, -40)
 
             local MaintLabel = Instance.new("TextLabel")
